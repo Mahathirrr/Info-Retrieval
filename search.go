@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -465,64 +464,4 @@ func searching(query string, method string) []SearchResult {
 	})
 
 	return results
-}
-
-// GenerateInvertedIndexJSON menghasilkan file JSON dari inverted index
-func GenerateInvertedIndexJSON(articles []Article) error {
-	// Build inverted index
-	invertedIndex := buildInvertedIndex(articles)
-
-	// Convert ke JSON dengan indentasi
-	jsonData, err := json.MarshalIndent(invertedIndex, "", "    ")
-	if err != nil {
-		return fmt.Errorf("error marshaling JSON: %v", err)
-	}
-
-	// Tulis ke file
-	if err := ioutil.WriteFile("inverted_index.json", jsonData, 0644); err != nil {
-		return fmt.Errorf("error writing JSON file: %v", err)
-	}
-
-	// Print contoh struktur untuk satu term (jika ada)
-	fmt.Println("Example of index structure:")
-	for term, postingList := range invertedIndex.Index {
-		exampleJSON, _ := json.MarshalIndent(map[string]*PostingList{
-			term: postingList,
-		}, "", "    ")
-		fmt.Println(string(exampleJSON))
-		break // Hanya print satu term sebagai contoh
-	}
-
-	// Print statistik
-	printIndexStatistics(articles)
-
-	return nil
-}
-
-// printIndexStatistics menampilkan statistik dari index
-func printIndexStatistics(articles []Article) {
-	idx := buildInvertedIndex(articles)
-
-	// Hitung statistik
-	totalTerms := len(idx.Index)
-	totalPostings := 0
-	maxFreq := 0
-	var termWithMaxFreq string
-
-	for term, postingList := range idx.Index {
-		totalPostings += postingList.DocFrequency
-		for _, posting := range postingList.Postings {
-			if posting.Frequency > maxFreq {
-				maxFreq = posting.Frequency
-				termWithMaxFreq = term
-			}
-		}
-	}
-
-	fmt.Printf("\nIndex Statistics:\n")
-	fmt.Printf("Total articles: %d\n", len(articles))
-	fmt.Printf("Total unique terms: %d\n", totalTerms)
-	fmt.Printf("Total postings: %d\n", totalPostings)
-	fmt.Printf("Average postings per term: %.2f\n", float64(totalPostings)/float64(totalTerms))
-	fmt.Printf("Term with highest frequency: '%s' (freq: %d)\n", termWithMaxFreq, maxFreq)
 }
