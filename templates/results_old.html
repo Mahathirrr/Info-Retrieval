@@ -1,0 +1,147 @@
+<!-- templates/results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Search Results</title>
+    <style>
+        .google-logo-small {
+            font-family: sans-serif;
+            font-size: 1.5rem;
+            text-decoration: none;
+        }
+        .google-logo-small span:nth-child(1) { color: #4285F4; }
+        .google-logo-small span:nth-child(2) { color: #EA4335; }
+        .google-logo-small span:nth-child(3) { color: #FBBC05; }
+        .google-logo-small span:nth-child(4) { color: #4285F4; }
+        .google-logo-small span:nth-child(5) { color: #34A853; }
+        .google-logo-small span:nth-child(6) { color: #EA4335; }
+        
+        /* Google-style link colors */
+        .search-result-link {
+            color: #1a0dab;
+            text-decoration: none;
+        }
+        .search-result-link:visited {
+            color: #681da8;
+        }
+        .search-result-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Google-style pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+        }
+        .pagination a {
+            color: #4285f4;
+            padding: 8px 12px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-radius: 4px;
+            margin: 0 4px;
+        }
+        .pagination a:hover {
+            background-color: #f1f3f4;
+        }
+        .pagination .current {
+            color: #000;
+            background-color: #fff;
+            font-weight: bold;
+        }
+        .result-stats {
+            color: #70757a;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white">
+    <header class="border-b">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center">
+                <a href="/" class="google-logo-small mr-8">
+                    <span>S</span><span>e</span><span>a</span><span>r</span><span>c</span><span>h</span>
+                </a>
+                <div class="flex-grow max-w-2xl">
+                    <form action="/search" method="get" class="flex items-center">
+                        <input 
+                            type="text" 
+                            name="q" 
+                            class="flex-grow px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:border-gray-300 shadow-sm hover:shadow-md transition-shadow"
+                            value="{{.query}}"
+                            required
+                        >
+                        <select 
+                            name="method" 
+                            class="ml-4 px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:border-gray-300"
+                        >
+                            <option value="cosine" {{if eq .method "cosine"}}selected{{end}}>Cosine</option>
+                            <option value="jaccard" {{if eq .method "jaccard"}}selected{{end}}>Jaccard</option>
+                        </select>
+                        <button 
+                            type="submit" 
+                            class="ml-4 px-6 py-2 bg-[#f8f9fa] text-gray-800 rounded-md hover:shadow-md border border-[#f8f9fa] hover:border-gray-200 transition-all"
+                        >
+                            Search
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-4">
+        <div class="max-w-2xl">
+            {{if .results}}
+                <div class="result-stats">
+                    About {{.totalResults}} results (Page {{.currentPage}} of {{.totalPages}})
+                </div>
+                <div class="space-y-8">
+                    {{range .results}}
+                        <div class="result">
+                            <a href="/document/{{.Filename}}" class="search-result-link text-xl">
+                                {{.Title}}
+                            </a>
+                            <div class="text-sm text-[#202124] mt-1">
+                                {{.Content}}
+                            </div>
+                            <div class="text-xs text-[#70757a] mt-1">
+                                Relevance Score: {{printf "%.2f" .Score}}
+                            </div>
+                        </div>
+                    {{end}}
+                </div>
+
+                <div class="pagination">
+                    {{if .showPrevious}}
+                        <a href="/search?q={{.query}}&method={{.method}}&page={{.previousPage}}">Previous</a>
+                    {{end}}
+                    
+                    {{range $i := iterate 1 .totalPages}}
+                        {{if eq $i $.currentPage}}
+                            <a href="#" class="current">{{$i}}</a>
+                        {{else}}
+                            <a href="/search?q={{$.query}}&method={{$.method}}&page={{$i}}">{{$i}}</a>
+                        {{end}}
+                    {{end}}
+                    
+                    {{if .showNext}}
+                        <a href="/search?q={{.query}}&method={{.method}}&page={{.nextPage}}">Next</a>
+                    {{end}}
+                </div>
+            {{else}}
+                <div class="text-center py-8">
+                    <p class="text-gray-600">No results found for your search.</p>
+                    <p class="text-gray-500 mt-2">Try different keywords or check your spelling.</p>
+                </div>
+            {{end}}
+        </div>
+    </main>
+</body>
+</html>

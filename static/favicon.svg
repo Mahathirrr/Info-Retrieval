@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background rounded square -->
+  <rect 
+    x="0" 
+    y="0" 
+    width="512" 
+    height="512" 
+    rx="100" 
+    ry="100" 
+    fill="#209CEE"
+  />
+  
+  <!-- Stylized Q letter -->
+  <path 
+    d="M 256 80
+       A 176 176 0 1 0 256 432
+       A 176 176 0 1 0 256 80
+       M 256 140
+       A 116 116 0 1 1 256 372
+       A 116 116 0 1 1 256 140
+       L 380 380
+       L 340 420
+       L 290 370"
+    fill="#FFFFFF"
+    stroke="#FFFFFF"
+    stroke-width="8"
+  />
+</svg>

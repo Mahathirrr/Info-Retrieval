@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Search Results - {{.query}}</title>
+    <style>
+        /* Base styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: arial, sans-serif;
+            min-height: 100vh;
+            background: #fff;
+            color: #202124;
+        }
+
+        /* Logo styling */
+        .search-logo-small {
+            font-family: sans-serif;
+            font-size: 24px;
+            text-decoration: none;
+            padding-right: 4px;
+        }
+        .search-logo-small span:nth-child(1) { color: #4285F4; }
+        .search-logo-small span:nth-child(2) { color: #EA4335; }
+        .search-logo-small span:nth-child(3) { color: #FBBC05; }
+        .search-logo-small span:nth-child(4) { color: #4285F4; }
+        .search-logo-small span:nth-child(5) { color: #34A853; }
+        .search-logo-small span:nth-child(6) { color: #EA4335; }
+
+        /* Header layout */
+        .header-wrapper {
+            padding-top: 20px;
+            background: #fff;
+        }
+
+        .header-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            gap: 44px;
+        }
+
+        /* Search box styling */
+        .search-container {
+            max-width: 692px;
+            width: 100%;
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            height: 46px;
+            padding: 0 40px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-box:hover, 
+        .search-box:focus {
+            background-color: #fff;
+            box-shadow: 0 1px 6px rgba(32,33,36,.28);
+            border-color: rgba(223,225,229,0);
+        }
+
+        /* Search icon */
+        .search-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .search-icon svg {
+            width: 20px;
+            height: 20px;
+            color: #4285f4;
+        }
+
+        /* Navigation bar */
+        .nav-bar {
+            margin-top: 16px;
+            padding: 0;
+            border-bottom: 1px solid #ebebeb;
+        }
+
+        .nav-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .nav-item {
+            color: #5f6368;
+            text-decoration: none;
+            margin-right: 28px;
+            padding: 16px 12px 12px;
+            font-size: 14px;
+            line-height: 16px;
+            display: inline-block;
+        }
+
+        .nav-item:first-child {
+            margin-left: 125px;  /* Aligns with search box */
+        }
+
+        .nav-item.active {
+            color: #1a73e8;
+            border-bottom: 3px solid #1a73e8;
+            font-weight: 500;
+            margin-bottom: -1.5px;
+        }
+
+        /* Main content area */
+        .main-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .search-results {
+            margin-left: 170px;
+            max-width: 652px;
+        }
+
+        /* Stats and results */
+        .result-stats {
+            color: #70757a;
+            font-size: 14px;
+            padding: 8px 0 6px;
+            white-space: nowrap;
+        }
+
+        .search-result {
+            margin-bottom: 30px;
+        }
+
+        /* Site information */
+        .site-info {
+            line-height: 20px;
+            font-size: 14px;
+            padding-bottom: 2px;
+            display: flex;
+            align-items: center;
+        }
+
+        .site-info img {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            border-radius: 50%;
+        }
+
+        .site-divider {
+            color: #70757a;
+            margin: 0 3px;
+            font-size: 10px;
+        }
+
+        .site-url {
+            color: #4d5156;
+        }
+
+        /* Result title and content */
+        .search-result-title {
+            font-size: 20px;
+            line-height: 1.3;
+            margin: 0;
+            padding: 4px 0;
+        }
+
+        .search-result-link {
+            color: #1a0dab;
+            text-decoration: none;
+        }
+
+        .search-result-link:visited {
+            color: #681da8;
+        }
+
+        .search-result-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Result content with highlight */
+        .result-content {
+            color: #4d5156;
+            line-height: 1.58;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .result-content em {
+            font-weight: bold;
+            font-style: normal;
+            color: #202124;
+        }
+
+        /* Score display */
+        .score-info {
+            color: #70757a;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* Pagination */
+        .pagination {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .pagination a {
+            color: #1a73e8;
+            text-decoration: none;
+            padding: 12px 16px;
+            margin: 0 4px;
+            border-radius: 4px;
+        }
+
+        .pagination a:hover {
+            background-color: #f1f3f4;
+        }
+
+        .pagination .current {
+            color: #202124;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-wrapper">
+            <div class="header-content">
+                <a href="/" class="search-logo-small">
+                    <span>S</span><span>e</span><span>a</span><span>r</span><span>c</span><span>h</span>
+                </a>
+                
+                <div class="search-container">
+                    <form action="/search" method="get">
+                        <input 
+                            type="text" 
+                            name="q" 
+                            value="{{.query}}"
+                            class="search-box"
+                            autocomplete="off"
+                            required
+                        >
+                        <button type="submit" class="search-icon">
+                            <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="method" value="{{.method}}">
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-bar">
+            <div class="nav-content">
+                <a href="/search?q={{.query}}&method=cosine" class="nav-item {{if eq .method "cosine"}}active{{end}}">
+                    Cosine
+                </a>
+                <a href="/search?q={{.query}}&method=jaccard" class="nav-item {{if eq .method "jaccard"}}active{{end}}">
+                    Jaccard
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="search-results">
+            {{if .results}}
+                <div class="result-stats">
+                    About {{.totalResults}} results (Page {{.currentPage}} of {{.totalPages}})
+                </div>
+
+                {{range .results}}
+                    <div class="search-result">
+                        <div class="site-info">
+                            <img src="/static/logo_kompas.webp" alt="Kompas.com" />
+                            <span>Kompas.com</span>
+                            <span class="site-divider">›</span>
+                            <span class="site-url">https://tekno.kompas.com</span>
+                        </div>
+
+                        <h3 class="search-result-title">
+                            <a href="/document/{{.Filename}}" class="search-result-link">
+                                {{.Title}}
+                            </a>
+                        </h3>
+
+                        <div class="result-content">
+                            {{.HighlightedContent}}
+                        </div>
+
+                        <div class="score-info">
+                            Relevance Score: {{printf "%.2f" .Score}}
+                        </div>
+                    </div>
+                {{end}}
+
+                {{if gt .totalPages 1}}
+                    <div class="pagination">
+                        {{if .showPrevious}}
+                            <a href="/search?q={{.query}}&method={{.method}}&page={{.previousPage}}">
+                                Previous
+                            </a>
+                        {{end}}
+                        
+                        {{range $i := iterate 1 .totalPages}}
+                            {{if eq $i $.currentPage}}
+                                <a href="#" class="current">{{$i}}</a>
+                            {{else}}
+                                <a href="/search?q={{$.query}}&method={{$.method}}&page={{$i}}">
+                                    {{$i}}
+                                </a>
+                            {{end}}
+                        {{end}}
+                        
+                        {{if .showNext}}
+                            <a href="/search?q={{.query}}&method={{.method}}&page={{.nextPage}}">
+                                Next
+                            </a>
+                        {{end}}
+                    </div>
+                {{end}}
+            {{else}}
+                <div class="text-center py-12">
+                    <p class="text-[#202124] text-lg">
+                        No results found for <strong>"{{.query}}"</strong>
+                    </p>
+                    <p class="text-[#5f6368] mt-2">
+                        Try different keywords or check your spelling
+                    </p>
+                </div>
+            {{end}}
+        </div>
+    </main>
+</body>
+</html>

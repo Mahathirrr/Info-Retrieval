@@ -1,0 +1,56 @@
+<!-- templates/404.html -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <title>404 - Not Found</title>
+    <style>
+      .google-logo-small {
+        font-family: sans-serif;
+        font-size: 1.5rem;
+        text-decoration: none;
+      }
+      .google-logo-small span:nth-child(1) {
+        color: #4285f4;
+      }
+      .google-logo-small span:nth-child(2) {
+        color: #ea4335;
+      }
+      .google-logo-small span:nth-child(3) {
+        color: #fbbc05;
+      }
+      .google-logo-small span:nth-child(4) {
+        color: #4285f4;
+      }
+      .google-logo-small span:nth-child(5) {
+        color: #34a853;
+      }
+      .google-logo-small span:nth-child(6) {
+        color: #ea4335;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-white">
+    <header class="border-b mb-8">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex items-center">
+          <a href="/" class="google-logo-small">
+            <span>S</span><span>e</span><span>a</span><span>r</span
+            ><span>c</span><span>h</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 text-center">
+      <h1 class="text-9xl font-bold text-gray-200 mb-4">404</h1>
+      <p class="text-xl text-gray-600 mb-8">Page not found</p>
+      <a href="/" class="text-[#1a0dab] hover:underline">Return to Search</a>
+    </main>
+  </body>
+</html>
