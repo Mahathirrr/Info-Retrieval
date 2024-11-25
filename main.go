@@ -22,6 +22,7 @@ func main() {
 	r.GET("/", indexHandler)
 	r.POST("/search", searchHandler)
 	r.GET("/search", searchHandlerGet)
+	r.POST("/refresh-search-engine", refreshSearchEngine)
 
 	// r.GET("/generate-index", func(c *gin.Context) {
 	// 	articles, err := loadArticles()
@@ -127,4 +128,13 @@ func searchHandlerGet(c *gin.Context) {
 		"showPrevious": page > 1,
 		"showNext":     page < totalPages,
 	})
+}
+
+// Tambahkan endpoint untuk memperbarui data jika diperlukan
+func refreshSearchEngine(c *gin.Context) {
+	if err := searchEngine.Refresh(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Search engine data refreshed successfully"})
 }

@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/RadhiFadlillah/go-sastrawi"
 )
@@ -53,10 +54,56 @@ type TextProcessor struct {
 	numbers     *regexp.Regexp
 }
 
-var textProcessor *TextProcessor
+// Tambahkan struktur untuk menyimpan data di memori
+type SearchEngine struct {
+	Articles      []Article
+	InvertedIndex *InvertedIndex
+	TFIDFScores   map[string]map[int]float64
+	mutex         sync.RWMutex
+}
 
-func init() {
-	textProcessor = NewTextProcessor()
+var (
+	searchEngine *SearchEngine
+	once         sync.Once
+)
+
+// Inisialisasi search engine
+func initSearchEngine() {
+	once.Do(func() {
+		searchEngine = &SearchEngine{}
+		if err := searchEngine.Initialize(); err != nil {
+			log.Fatalf("Failed to initialize search engine: %v", err)
+		}
+	})
+}
+
+// Method untuk inisialisasi SearchEngine
+func (se *SearchEngine) Initialize() error {
+	// Load articles
+	articles, err := loadArticles()
+	if err != nil {
+		return err
+	}
+
+	// Build inverted index
+	invertedIndex := buildInvertedIndex(articles)
+
+	// Calculate TF-IDF scores
+	tfidfScores := calculateTFIDF(invertedIndex, len(articles))
+
+	// Set data ke struct
+	se.mutex.Lock()
+	se.Articles = articles
+	se.InvertedIndex = invertedIndex
+	se.TFIDFScores = tfidfScores
+	se.mutex.Unlock()
+
+	return nil
+}
+
+// Method untuk refresh data (jika diperlukan)
+func (se *SearchEngine) Refresh() error {
+	return se.Initialize()
 }
 
 func NewTextProcessor() *TextProcessor {
@@ -71,6 +118,13 @@ func NewTextProcessor() *TextProcessor {
 		punctuation: regexp.MustCompile(`[^\w\s]`),
 		numbers:     regexp.MustCompile(`\b\d+\b`),
 	}
+}
+
+var textProcessor *TextProcessor
+
+func init() {
+	textProcessor = NewTextProcessor()
+	initSearchEngine()
 }
 
 // Text Processing Steps
@@ -204,7 +258,6 @@ func normalizeVector(vector map[string]float64) map[string]float64 {
 // Cosine Similarity dengan TF-IDF
 func cosineSimilarityWithTFIDF(queryVector map[string]float64, tfidfScores map[string]map[int]float64, docID int) float64 {
 	docVector := make(map[string]float64)
-
 	for term, scores := range tfidfScores {
 		if score, exists := scores[docID]; exists {
 			docVector[term] = score
@@ -214,14 +267,23 @@ func cosineSimilarityWithTFIDF(queryVector map[string]float64, tfidfScores map[s
 	normalizedQuery := normalizeVector(queryVector)
 	normalizedDoc := normalizeVector(docVector)
 
-	var dotProduct float64
+	var dotProduct, queryMagnitude, docMagnitude float64
+
 	for term, queryWeight := range normalizedQuery {
+		queryMagnitude += queryWeight * queryWeight
 		if docWeight, exists := normalizedDoc[term]; exists {
 			dotProduct += queryWeight * docWeight
 		}
 	}
 
-	return dotProduct
+	for _, docWeight := range normalizedDoc {
+		docMagnitude += docWeight * docWeight
+	}
+
+	queryMagnitude = math.Sqrt(queryMagnitude)
+	docMagnitude = math.Sqrt(docMagnitude)
+
+	return dotProduct / (queryMagnitude * docMagnitude)
 }
 
 // Jaccard Similarity dengan TF-IDF
@@ -416,14 +478,9 @@ func loadArticles() ([]Article, error) {
 
 // Main search function
 func searching(query string, method string) []SearchResult {
-	articles, err := loadArticles()
-	if err != nil {
-		log.Printf("Error loading articles: %v", err)
-		return nil
-	}
-
-	invertedIndex := buildInvertedIndex(articles)
-	tfidfScores := calculateTFIDF(invertedIndex, len(articles))
+	// Gunakan read lock untuk membaca data
+	searchEngine.mutex.RLock()
+	defer searchEngine.mutex.RUnlock()
 
 	queryTokens := textProcessor.ProcessText(query)
 	queryVector := make(map[string]float64)
@@ -433,15 +490,15 @@ func searching(query string, method string) []SearchResult {
 
 	var results []SearchResult
 
-	for i, article := range articles {
+	for i, article := range searchEngine.Articles {
 		var score float64
 		switch method {
 		case "cosine":
-			score = cosineSimilarityWithTFIDF(queryVector, tfidfScores, i)
+			score = cosineSimilarityWithTFIDF(queryVector, searchEngine.TFIDFScores, i)
 		case "jaccard":
-			score = jaccardSimilarityWithTFIDF(queryVector, tfidfScores, i)
+			score = jaccardSimilarityWithTFIDF(queryVector, searchEngine.TFIDFScores, i)
 		default:
-			score = cosineSimilarityWithTFIDF(queryVector, tfidfScores, i)
+			score = cosineSimilarityWithTFIDF(queryVector, searchEngine.TFIDFScores, i)
 		}
 
 		if score > 0 {
