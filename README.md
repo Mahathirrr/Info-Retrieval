@@ -10,10 +10,11 @@ A Go-based search engine application specifically designed for property news art
 ## Interface Screenshots
 
 ### Search Page
-[Place your search page screenshot here]
+![241128_07h10m10s_screenshot](https://github.com/user-attachments/assets/4505531b-c6bb-420e-ad97-8eb4bd135d1b)
+
 
 ### Results Page
-[Place your results page screenshot here]
+![241128_07h12m18s_screenshot](https://github.com/user-attachments/assets/1990c884-c4e0-4146-b6e3-6b0138da6998)
 
 ## Data Sources
 
