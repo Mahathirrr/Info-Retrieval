@@ -79,6 +79,7 @@ The search engine crawls and indexes articles from three major Indonesian proper
     ├── 404.html
     ├── document.html
     └── index.html
+    └── results.html
 ```
 
 ## Key Components
