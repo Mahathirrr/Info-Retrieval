@@ -7,6 +7,14 @@ A Go-based search engine application specifically designed for property news art
 - **Kelompok**: 15
 - **Anggota**: Muhammad Mahathir (2208107010056)
 
+## Interface Screenshots
+
+### Search Page
+[Place your search page screenshot here]
+
+### Results Page
+[Place your results page screenshot here]
+
 ## Data Sources
 
 The search engine crawls and indexes articles from three major Indonesian property news portals:
